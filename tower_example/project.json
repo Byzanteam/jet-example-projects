@@ -1,0 +1,15 @@
+{
+  "$schema": "https://cdn.jsdelivr.net/gh/Byzanteam/jcli/schemas/project-file.v1.json",
+  "name": "tower_example",
+  "title": "tower_example",
+  "capabilities": [],
+  "instances": [
+    {
+      "pluginName": "tower-nightly",
+      "name": "tower",
+      "config": {
+        "pluginKey": "7b3b709f-0da9-44d3-ba63-ba2511d98e96"
+      }
+    }
+  ]
+}
