@@ -1,0 +1,26 @@
+{
+  "$schema": "https://cdn.jsdelivr.net/gh/Byzanteam/jcli/schemas/project-file.v1.json",
+  "name": "importer_example",
+  "title": "excel-importer",
+  "capabilities": [
+    {
+      "name": "excel_importer_database",
+      "payload": {
+        "__type__": "database",
+        "schema": "excel_importer"
+      }
+    }
+  ],
+  "instances": [
+    {
+      "capabilityNames": [
+        "excel_importer_database"
+      ],
+      "config": {
+        "placeholder": "foo"
+      },
+      "name": "importer",
+      "pluginName": "excel-importer"
+    }
+  ]
+}
