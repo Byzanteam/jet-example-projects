@@ -5,8 +5,9 @@
   "capabilities": [],
   "instances": [
     {
-      "pluginName": "tower-nightly",
+      "pluginName": "tower",
       "name": "tower",
+      "capabilityNames": [],
       "config": {
         "pluginKey": "7b3b709f-0da9-44d3-ba63-ba2511d98e96"
       }

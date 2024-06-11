@@ -1,43 +1,42 @@
-import { JetTower } from "https://cdn.jsdelivr.net/gh/Byzanteam/jet-tower-plugin-js@2ba09f04586edff3a3e209242bc22ecd90aa39e7/mod.ts";
-import { Hono } from "https://esm.sh/hono@4.0.10";
-import { OAuth2Client } from "https://deno.land/x/oauth2_client@v1.0.2/mod.ts";
-import { joinPath } from "https://cdn.jsdelivr.net/gh/Byzanteam/breeze-js@latest/lib/url.ts";
+import { JetTower } from "https://cdn.jsdelivr.net/gh/Byzanteam/jet-tower-plugin-js@v0.1.0/mod.ts";
+import { Hono } from "https://deno.land/x/hono@v4.0.10/mod.ts";
+import { joinPath } from "https://cdn.jsdelivr.net/gh/Byzanteam/breeze-js@v0.2.2/lib/url.ts";
+import {
+  AuthorizationCodeAccessTokenRequestContext,
+  AuthorizationCodeAuthorizationURL,
+  sendTokenRequest,
+} from "https://esm.sh/@oslojs/oauth2@0.1.2";
 
 const tower = new JetTower({ instanceName: "tower" });
 
 const authorizeUrl = await tower.authorizeUrl();
 const tokenUrl = await tower.tokenUrl();
-const { clientId, clientSecret } = await tower.oauthClient();
+const { clientId, clientSecret } = await tower.getOauthClient();
 
 console.log(`Authorize URL: ${authorizeUrl.toString()}`);
 console.log(`Token URL: ${tokenUrl.toString()}`);
 console.log(`Client ID: ${clientId}`);
 console.log(`Client Secret: ${clientSecret}`);
 
-const oauth2Client = new OAuth2Client({
-  clientId,
-  clientSecret,
-  authorizationEndpointUri: authorizeUrl.toString(),
-  tokenUri: tokenUrl.toString(),
-  redirectUri:
-    "https://nightly.jet.apps.jet.work/breeze/tower_example/development/main/oauth2/callback",
-});
-
 const app = new Hono();
 
-app.get("/", (c) => {
+app.get("/", (ctx) => {
   console.log(`Request reached.`);
-  return c.text("Hello Deno!");
+  return ctx.text("Hello Deno!");
 });
 
-app.get("/login", async (ctx) => {
-  const { uri } = await oauth2Client.code.getAuthorizationUri({
-    disablePkce: true,
-  });
+app.get("/login", (ctx) => {
+  const url = new AuthorizationCodeAuthorizationURL(
+    authorizeUrl.toString(),
+    clientId,
+  );
+  url.setRedirectURI(
+    "https://nightly.jet.apps.jet.work/breeze/tower_example_v2/development/main/oauth2/callback",
+  );
 
-  console.log(`Redirecting to: ${uri.toString()}`);
+  console.log(`Redirecting to: ${url.toString()}`);
 
-  return ctx.redirect(uri.toString());
+  return ctx.redirect(url.toString());
 });
 
 app.get("/oauth2/callback", async (ctx) => {
@@ -50,7 +49,15 @@ app.get("/oauth2/callback", async (ctx) => {
 
   console.log(`Getting token...`);
 
-  const tokens = await oauth2Client.code.getToken(url.toString());
+  const code = url.searchParams.get("code");
+
+  const context = new AuthorizationCodeAccessTokenRequestContext(code!);
+  context.setRedirectURI(
+    "https://nightly.jet.apps.jet.work/breeze/tower_example_v2/development/main/oauth2/callback",
+  );
+  context.authenticateWithHTTPBasicAuth(clientId, clientSecret);
+
+  const tokens = await sendTokenRequest(tokenUrl.toString(), context);
 
   console.log(`Get token: ${JSON.stringify(tokens)}`);
 
@@ -58,7 +65,7 @@ app.get("/oauth2/callback", async (ctx) => {
 
   const { sub, name, phoneNumber, updatedAt, ...extraInfo } = await tower
     .getUserInfo(
-      tokens.accessToken,
+      tokens.access_token,
     );
 
   const u = new Date(updatedAt * 1000);
