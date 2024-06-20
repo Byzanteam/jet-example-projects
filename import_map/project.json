@@ -6,6 +6,8 @@
   "instances": [],
   "imports": {
     "hono/": "https://deno.land/x/hono@v4.3.11/",
-    "breeze-js/": "https://cdn.jsdelivr.net/gh/Byzanteam/breeze-js@latest/"
+    "breeze-js/": "https://cdn.jsdelivr.net/gh/Byzanteam/breeze-js@latest/",
+    "#/": "./",
+    "#functions/": "../"
   }
 }

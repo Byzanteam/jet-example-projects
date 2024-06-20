@@ -5,8 +5,9 @@ import { serveHttp } from "breeze-js/lib/runtime.ts";
 //   "#/": "./",
 //   "#functions/": "../"
 // };
-// cwd: "functions/main/"
-// entryfiel: "main.ts"
+// cwd: ?
+// entryfile: ?
+
 import log from "#functions/api/log.ts";
 
 const app = new Hono();
