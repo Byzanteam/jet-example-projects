@@ -1,0 +1,29 @@
+{
+  "$schema": "https://cdn.jsdelivr.net/gh/Byzanteam/jcli/schemas/project-file.v1.json",
+  "name": "sms_plugin_example",
+  "title": "sms_plugin_example",
+  "capabilities": [
+    {
+      "name": "sms_database",
+      "payload": {
+        "__type__": "database",
+        "schema": "sms_example"
+      }
+    }
+  ],
+  "instances": [
+    {
+      "capabilityNames": [
+        "sms_database"
+      ],
+      "config": {
+        "accessKeyId": "{{ ACCESS_KEY_ID }}",
+        "accessSecret": "{{ ACCESS_SECRET }}",
+        "queues": "default:20",
+        "signName": "{{ SIGN_NAME }}"
+      },
+      "name": "sms",
+      "pluginName": "sms"
+    }
+  ]
+}
