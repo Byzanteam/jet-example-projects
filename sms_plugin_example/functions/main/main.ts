@@ -1,4 +1,5 @@
 import { Hono } from "https://deno.land/x/hono@v4.3.3/mod.ts";
+import { wrapTransaction } from "./db.ts";
 
 const app = new Hono();
 
@@ -9,6 +10,18 @@ app.get("/", (ctx) => {
 app.get("/sms", async (ctx) => {
   const res = await sendSms();
   return ctx.text(res);
+});
+
+app.get("/logs", async (ctx) => {
+  const logs = await wrapTransaction(async (trx) => {
+    return await trx
+      .withSchema("sms_example")
+      .selectFrom("logs")
+      .selectAll()
+      .execute();
+  });
+
+  return ctx.json(logs);
 });
 
 const query = `
