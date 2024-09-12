@@ -3,7 +3,7 @@ import { Hono } from "https://deno.land/x/hono@v4.3.3/mod.ts";
 const app = new Hono();
 
 const pluginInstance: BreezeRuntime.Plugin = BreezeRuntime.plugins["storage"];
-const url = await pluginInstance.getEndpoint("/api/objects");
+const url = await pluginInstance.getEndpoint("/objects");
 
 app.get("/", (ctx) => {
   return ctx.text(`endpoint: ${url}`);
@@ -18,6 +18,7 @@ app.get("/create", async (ctx) => {
     body: JSON.stringify({
       bucket: "jet-storage-plugin-example",
       content_types: "text/plain",
+      mimetype: "text/plain",
       key: "hello.txt",
       max_content_length: 5242880,
       metadata: {},
