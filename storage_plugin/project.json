@@ -1,0 +1,33 @@
+{
+  "$schema": "https://cdn.jsdelivr.net/gh/Byzanteam/jcli/schemas/project-file.v1.json",
+  "name": "storage_plugin",
+  "title": "storage_plugin",
+  "capabilities": [
+    {
+      "name": "storage_database",
+      "payload": {
+        "__type__": "database",
+        "schema": "storage_schema"
+      }
+    }
+  ],
+  "instances": [
+    {
+      "capabilityNames": [
+        "storage_database"
+      ],
+      "config": {
+        "buckets": [
+          {
+            "name": "jet-storage-plugin-example",
+            "endpoint": "https://nightly.minio.apps.jet.work/api/v1/service-account-credentials",
+            "accessKey": "aJzMVnxBg4ZSOHXnBmIN",
+            "secretKey": "PwGSSuufEYrsAc49sF2um4fEFbrUPMzPSnkZ7Fd1"
+          }
+        ]
+      },
+      "name": "storage",
+      "pluginName": "storage"
+    }
+  ]
+}
