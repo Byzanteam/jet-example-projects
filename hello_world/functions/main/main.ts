@@ -1,4 +1,5 @@
 import { Hono } from "https://deno.land/x/hono@v3.4.1/mod.ts";
+import { serveHttp } from "https://cdn.jsdelivr.net/gh/Byzanteam/breeze-js@latest/lib/runtime.ts";
 
 const app = new Hono();
 
@@ -11,4 +12,4 @@ app.notFound((c) => {
   return c.text("Not found", 404);
 });
 
-BreezeRuntime.serveHttp(app.fetch);
+serveHttp(app.fetch);
