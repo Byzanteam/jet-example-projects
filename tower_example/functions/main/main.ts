@@ -6,6 +6,7 @@ import {
   AuthorizationCodeAuthorizationURL,
   sendTokenRequest,
 } from "https://esm.sh/@oslojs/oauth2@0.1.2";
+import { wrapTransaction } from "./db.ts";
 
 const tower = new JetTower({ instanceName: "tower" });
 
@@ -31,12 +32,24 @@ app.get("/login", (ctx) => {
     clientId,
   );
   url.setRedirectURI(
-    "https://nightly.jet.apps.jet.work/breeze/tower_example_v2/development/main/oauth2/callback",
+    "http://localhost:2137/tower_example/development/main/oauth2/callback",
   );
 
   console.log(`Redirecting to: ${url.toString()}`);
 
   return ctx.redirect(url.toString());
+});
+
+app.get("/users", async (ctx) => {
+  const users = await wrapTransaction(async (trx) => {
+    return await trx
+      .withSchema("tower_example")
+      .selectFrom("universal_directory_users")
+      .selectAll()
+      .execute();
+  });
+
+  return ctx.json(users);
 });
 
 app.get("/oauth2/callback", async (ctx) => {
@@ -53,7 +66,7 @@ app.get("/oauth2/callback", async (ctx) => {
 
   const context = new AuthorizationCodeAccessTokenRequestContext(code!);
   context.setRedirectURI(
-    "https://nightly.jet.apps.jet.work/breeze/tower_example_v2/development/main/oauth2/callback",
+    "http://localhost:2137/tower_example/development/main/oauth2/callback",
   );
   context.authenticateWithHTTPBasicAuth(clientId, clientSecret);
 
