@@ -1,0 +1,38 @@
+{
+  "$schema": "https://cdn.jsdelivr.net/gh/Byzanteam/jcli/schemas/project-file.v1.json",
+  "name": "storage_plugin",
+  "title": "storage_plugin",
+  "capabilities": [
+    {
+      "name": "storage_plugin_database",
+      "payload": {
+        "__type__": "database",
+        "schema": "storage_plugin"
+      }
+    }
+  ],
+  "instances": [
+    {
+      "capabilityNames": [
+        "storage_plugin_database"
+      ],
+      "config": {
+        "buckets": [
+          {
+            "name": "jet-storage-plugin-example",
+            "endpoint": "https://nightly.minio.apps.jet.work",
+            "accessKey": "{{ ACCESS_KEY }}",
+            "secretKey": "{{ SECRET_KEY }}"
+          }
+        ]
+      },
+      "name": "storage",
+      "pluginName": "storage"
+    }
+  ],
+  "imports": {
+    "kysely-deno-postgres-dialect/": "https://deno.land/x/kysely_postgrs_js_dialect@v0.27.5/",
+    "postgresjs/": "https://deno.land/x/postgresjs@v3.4.4/",
+    "kysely/": "https://cdn.jsdelivr.net/npm/kysely@0.27.3/dist/esm/"
+  }
+}
