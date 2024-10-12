@@ -1,12 +1,12 @@
 import { getEnvOrThrow } from "https://cdn.jsdelivr.net/gh/byzanteam/breeze-js@v0.2.1/lib/runtime.ts";
 
-import { Kysely } from "kysely/index.js";
+import { Kysely } from "kysely";
 import {
   PostgresJSDialect,
   setup,
   wrapTransaction as wrapTransactionFn,
-} from "kysely-deno-postgres-dialect/mod.ts";
-import postgres from "postgresjs/mod.js";
+} from "kysely-deno-postgres-dialect";
+import postgres from "postgresjs";
 
 export interface UserTable {
   name: string;
