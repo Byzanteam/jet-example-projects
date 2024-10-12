@@ -15,12 +15,3 @@ To use this project, set the following environment variables:
 
 - ACCESS_KEY: The access key for the object storage.
 - SECRET_KEY: The secret key for the object storage.
-
-Usage Example
-
-<video width="640" height="360" controls>
-  <source src="./demo.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
-
-![DEMO GIF](./demo.gif)
