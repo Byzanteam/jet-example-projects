@@ -2,13 +2,13 @@ import { Hono } from "hono";
 import { html } from "hono/html";
 import { wrapTransaction } from "./db.ts";
 import { methodOverride } from "hono/method-override";
-import { buildUrl, getBaseUrl } from "breeze-js/url";
+import { buildUrl, getBaseUrl } from "breeze-js/storagePluginApi";
 
 const app = new Hono();
 const pluginInstance: BreezeRuntime.Plugin = BreezeRuntime.plugins["storage"];
-const url = await pluginInstance.getEndpoint("/objects");
-const baseUrl = getBaseUrl();
-const objectUrl = buildUrl("/objects", baseUrl);
+const storagePluginApi = await pluginInstance.getEndpoint("/objects");
+const exampleBaseUrl = getBaseUrl();
+const exampleBaseUrlWithObject = buildUrl("/objects");
 
 // 测试存储空间
 const testBucket = "jet-storage-plugin-example";
@@ -31,7 +31,7 @@ app.get("/", async (ctx) => {
       </head>
       <body class="py-5">
         <div class="flex flex-col items-center gap-3 w-full">
-          <form action="${objectUrl}" method="post" enctype="multipart/form-data" class="flex flex-col items-center gap-2">
+          <form action="${exampleBaseUrlWithObject}" method="post" enctype="multipart/form-data" class="flex flex-col items-center gap-2">
             <label for="uploader">
               <input id="uploader" name="file" type="file" class="hidden" />
               <div class="border rounded-md p-2 w-max">chose file</div>
@@ -49,10 +49,10 @@ app.get("/", async (ctx) => {
                       <p>Key: ${object.key}</p>
                     </div>
                     <div class="flex gap-2 ml-auto">
-                      <form action="${objectUrl}/${object.id}" method="get">
+                      <form action="${exampleBaseUrlWithObject}/${object.id}" method="get">
                         <button type="submit" class="cursor-pointer">show</button>
                       </form>
-                      <form action="${objectUrl}/${object.id}" method="post">
+                      <form action="${exampleBaseUrlWithObject}/${object.id}" method="post">
                         <input type="text" name="_method" value="DELETE" class="hidden" />
                         <button type="submit" class="cursor-pointer">delete</button>
                       </form>
@@ -72,7 +72,7 @@ app.post("/objects", async (ctx) => {
   const formData = await ctx.req.formData();
   const file = formData.get("file") as File;
   // 创建存储空间
-  const createBaseRes = await fetch(url, {
+  const createBaseRes = await fetch(storagePluginApi, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -89,7 +89,7 @@ app.post("/objects", async (ctx) => {
   if (createBaseRes.ok) {
     const createBaseData: {
       object_id: string;
-      url: string;
+      storagePluginApi: string;
       fields: object;
     } = await createBaseRes.json();
     const uploadFileForm = new FormData();
@@ -97,12 +97,12 @@ app.post("/objects", async (ctx) => {
       uploadFileForm.append(key, value);
     });
     uploadFileForm.set("file", file);
-    const uploadRes = await fetch(createBaseData.url, {
+    const uploadRes = await fetch(createBaseData.storagePluginApi, {
       method: "post",
       body: uploadFileForm,
     });
     if (uploadRes.ok) {
-      return ctx.redirect(baseUrl);
+      return ctx.redirect(exampleBaseUrl);
     }
     return ctx.text(await uploadRes.text());
   }
@@ -111,7 +111,7 @@ app.post("/objects", async (ctx) => {
 
 app.get("/objects/:id", async (ctx) => {
   const id = ctx.req.param("id");
-  const res = await fetch(`${url}/${id}`, {
+  const res = await fetch(`${storagePluginApi}/${id}`, {
     method: "get",
   });
   if (res.ok) {
@@ -124,11 +124,11 @@ app.get("/objects/:id", async (ctx) => {
 
 app.delete("/objects/:id", async (ctx) => {
   const id = ctx.req.param("id");
-  const res = await fetch(`${url}/${id}`, {
+  const res = await fetch(`${storagePluginApi}/${id}`, {
     method: "DELETE",
   });
   if (res.ok) {
-    return ctx.redirect(baseUrl);
+    return ctx.redirect(exampleBaseUrl);
   } else {
     console.error("Error:", res);
     return ctx.text(await res.text());
