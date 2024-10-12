@@ -10,6 +10,9 @@ const url = await pluginInstance.getEndpoint("/objects");
 const baseUrl = getBaseUrl();
 const objectUrl = buildUrl("/objects", baseUrl);
 
+// 测试存储空间
+const testBucket = "jet-storage-plugin-example";
+
 app.use("*", methodOverride({ app }));
 
 app.get("/", async (ctx) => {
@@ -75,7 +78,7 @@ app.post("/objects", async (ctx) => {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      bucket: "jet-storage-plugin-example",
+      bucket: testBucket,
       key: file.name,
       max_content_length: 5242880,
       metadata: {},

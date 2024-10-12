@@ -1,4 +1,4 @@
-import { getEnvOrThrow } from "https://cdn.jsdelivr.net/gh/byzanteam/breeze-js@v0.2.1/lib/runtime.ts";
+import { getEnvOrThrow } from "breeze-js/runtime";
 
 import { Kysely } from "kysely";
 import {
