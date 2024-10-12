@@ -4,25 +4,25 @@
   "title": "storage_plugin",
   "capabilities": [
     {
-      "name": "storage_plugin_database",
+      "name": "storage_plugin_db",
       "payload": {
         "__type__": "database",
-        "schema": "storage_plugin"
+        "schema": "storage_plugin_schema"
       }
     }
   ],
   "instances": [
     {
       "capabilityNames": [
-        "storage_plugin_database"
+        "storage_plugin_db"
       ],
       "config": {
         "buckets": [
           {
+            "accessKey": "exQYH47dX4VlhDQ2G0jN",
+            "endpoint": "https://nightly.minio-api.apps.jet.work",
             "name": "jet-storage-plugin-example",
-            "endpoint": "https://nightly.minio.apps.jet.work",
-            "accessKey": "{{ ACCESS_KEY }}",
-            "secretKey": "{{ SECRET_KEY }}"
+            "secretKey": "dX1zXHMqXFYotold5gSjPGFyAHSfqCrBBerP1M3Q"
           }
         ]
       },
@@ -31,8 +31,9 @@
     }
   ],
   "imports": {
+    "hono": "jsr:@hono/hono@4.6.3",
     "kysely-deno-postgres-dialect/": "https://deno.land/x/kysely_postgrs_js_dialect@v0.27.5/",
-    "postgresjs/": "https://deno.land/x/postgresjs@v3.4.4/",
-    "kysely/": "https://cdn.jsdelivr.net/npm/kysely@0.27.3/dist/esm/"
+    "kysely/": "https://cdn.jsdelivr.net/npm/kysely@0.27.3/dist/esm/",
+    "postgresjs/": "https://deno.land/x/postgresjs@v3.4.4/"
   }
 }

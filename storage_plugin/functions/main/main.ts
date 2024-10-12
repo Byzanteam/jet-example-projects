@@ -1,5 +1,5 @@
-import { Hono } from "https://deno.land/x/hono@v4.3.3/mod.ts";
-import { html } from "https://deno.land/x/hono@v4.3.3/helper.ts";
+import { Hono } from "hono";
+import { html } from "hono/html";
 import { wrapTransaction } from "./db.ts";
 
 const app = new Hono();
@@ -8,134 +8,141 @@ const pluginInstance: BreezeRuntime.Plugin = BreezeRuntime.plugins["storage"];
 const url = await pluginInstance.getEndpoint("/objects");
 
 app.get("/", async (ctx) => {
-  const objects: { id: string; key: string }[] = await wrapTransaction(
-    async (trx) => {
-      return await trx
-        .withSchema("storage_plugin")
-        .selectFrom("objects")
-        .selectAll()
-        .execute();
-    },
-  );
+  const objects = await wrapTransaction(async (trx) => {
+    return await trx.withSchema("storage_plugin_schema").selectFrom("objects")
+      .selectAll().execute();
+  });
 
-  return ctx.html(
-    html`<!DOCTYPE html>
-          <html lang="en">
-          <head>
-              <meta charset="UTF-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <title>show objects</title>
-              <style>
-                  body {
-                      display: flex;
-                      justify-content: center;
-                      align-items: center;
-                      min-height: 100vh;
-                      margin: 0;
-                      font-family: Arial, sans-serif;
-                  }
-      
-                  .data-container {
-                      list-style-type: none;
-                      padding: 0;
-                      width: 50%;
-                  }
-      
-                  .data-item {
-                      border: 1px solid #ddd;
-                      padding: 10px;
-                      margin: 10px 0;
-                      display: flex;
-                      justify-content: space-between;
-                      align-items: center;
-                  }
-      
-                  .data-item h2, .data-item p {
-                      margin: 0;
-                  }
-      
-                  .data-item h2 {
-                      font-size: 1.2em;
-                  }
-      
-                  .data-item p {
-                      color: #555;
-                  }
-              </style>
-          </head>
-          <body>
-              <ul id="data-container" class="data-container">
-                  ${
-      objects.map((item) =>
+  return ctx.html(html`
+    <!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+      </head>
+      <body class="py-5">
+        <div class="flex flex-col items-center gap-3 w-full">
+          <form action="https://nightly.jet.apps.jet.work/breeze/storage_plugin/development/main/create" method="post" enctype="multipart/form-data" class="flex flex-col items-center gap-2">
+            <label for="uploader">
+              <input id="uploader" name="file" type="file" class="hidden" />
+              <div class="border rounded-md p-2 w-max">chose file</div>
+            </label>
+
+            <button type="submit" class="border rounded-md p-2 w-max">创建资源</button>
+          </form>
+          <ul class="flex flex-col gap-2 w-1/2">
+            ${
+    objects.map(
+      (object) =>
         html`
-                      <li class="data-item">
-                          <h2>ID: ${item.id}</h2>
-                          <p>Key: ${item.key}</p>
-                      </li>
-                  `
-      )
-    }
-              </ul>
-          </body>
-          </html>`,
-  );
+                <li class="flex items-center justify-between py-4 px-5 border rounded-md">
+                  <div class="flex flex-col gap-1">
+                    <p>ID: ${object.id}</p>
+                    <p>Key: ${object.key}</p>
+                  </div>
+                  <div class="flex gap-2 ml-auto">
+                    <form action="https://nightly.jet.apps.jet.work/breeze/storage_plugin/development/main/show" method="get">
+                      <input type="text" name="id" value="${object.id}" class="hidden" />
+                      <button type="submit" class="cursor-pointer">show</button>
+                    </form>
+                    <form action="https://nightly.jet.apps.jet.work/breeze/storage_plugin/development/main/delete" method="get">
+                      <input type="text" name="id" value="${object.id}" class="hidden" />
+                      <button type="submit" class="cursor-pointer">delete</button>
+                    </form>
+                  </div>
+                </li>
+              `,
+    )
+  }
+          </ul>
+        </div>
+      </body>
+    </html>
+  `);
 });
 
-app.get("/create", async (ctx) => {
-  const res = await fetch(url, {
+app.post("/create", async (ctx) => {
+  const formData = await ctx.req.formData();
+  const file = formData.get("file") as File;
+
+  // 创建存储空间
+  const createBaseRes = await fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
       bucket: "jet-storage-plugin-example",
-      content_types: "text/plain",
-      mimetype: "text/plain",
-      key: "hello.txt",
+      key: file.name,
       max_content_length: 5242880,
       metadata: {},
-      method: "PUT",
       min_content_length: 1,
       post_expires_in_seconds: 3600,
     }),
   });
 
-  const result = await res.json();
+  if (createBaseRes.ok) {
+    const createBaseData: {
+      object_id: string;
+      url: string;
+      fields: object;
+    } = await createBaseRes.json();
 
-  if (res.ok) {
-    console.log("StorageResponse:", result.data);
-  } else {
-    console.error("Error:", result.errors);
+    const uploadFileForm = new FormData();
+
+    Object.entries(createBaseData.fields).forEach(([key, value]) => {
+      uploadFileForm.append(key, value);
+    });
+    uploadFileForm.set("file", file);
+
+    const uploadRes = await fetch(createBaseData.url, {
+      method: "post",
+      body: uploadFileForm,
+    });
+
+    if (uploadRes.ok) {
+      return ctx.redirect(
+        "https://nightly.jet.apps.jet.work/breeze/storage_plugin/development/main",
+      );
+    }
+
+    return ctx.text(await uploadRes.text());
   }
-  return ctx.json(result);
+
+  return ctx.json(await createBaseRes.json());
 });
 
 app.get("/show", async (ctx) => {
-  const id = ctx.req.param("id");
-  const res = await fetch(`${url}/${id}`);
+  const { id } = ctx.req.query();
 
-  const result = await res.json();
+  const res = await fetch(`${url}/${id}`, {
+    method: "get",
+  });
 
   if (res.ok) {
-    console.log("StorageResponse:", result.data);
+    const result = await res.json();
+    return ctx.redirect(result.download_url);
   } else {
-    console.error("Error:", result.errors);
+    return ctx.text(await res.text());
   }
-  return ctx.json(result);
 });
 
 app.get("/delete", async (ctx) => {
-  const id = ctx.req.param("id");
+  const { id } = ctx.req.query();
+
   const res = await fetch(`${url}/${id}`, {
     method: "DELETE",
   });
 
   if (res.ok) {
-    console.log("StorageResponse:", res);
-    return ctx.text("deleted");
+    return ctx.redirect(
+      "https://nightly.jet.apps.jet.work/breeze/storage_plugin/development/main",
+    );
   } else {
     console.error("Error:", res);
-    return ctx.text("error");
+    return ctx.text(await res.text());
   }
 });
 
