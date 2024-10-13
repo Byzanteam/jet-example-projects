@@ -8,7 +8,6 @@ const app = new Hono();
 const pluginInstance: BreezeRuntime.Plugin = BreezeRuntime.plugins["storage"];
 const storagePluginApi = await pluginInstance.getEndpoint("/objects");
 const exampleBaseUrl = getBaseUrl();
-const exampleBaseUrlWithObject = buildUrl("/objects");
 
 // 测试存储空间
 const testBucket = "jet-storage-plugin-example";
@@ -20,6 +19,7 @@ app.get("/", async (ctx) => {
     return await trx.withSchema("storage_plugin_schema").selectFrom("objects")
       .selectAll().execute();
   });
+
   return ctx.html(html`
     <!DOCTYPE html>
     <html lang="en">
@@ -31,35 +31,37 @@ app.get("/", async (ctx) => {
       </head>
       <body class="py-5">
         <div class="flex flex-col items-center gap-3 w-full">
-          <form action="${exampleBaseUrlWithObject}" method="post" enctype="multipart/form-data" class="flex flex-col items-center gap-2">
+          <form action="${
+    buildUrl("/objects")
+  }" method="post" enctype="multipart/form-data" class="flex flex-col items-center gap-2">
             <label for="uploader">
               <input id="uploader" name="file" type="file" class="hidden" />
-              <div class="border rounded-md p-2 w-max">chose file</div>
+              <div class="border rounded-md p-2 w-max">选择文件</div>
             </label>
-            <button type="submit" class="border rounded-md p-2 w-max">创建资源</button>
+            <button type="submit" class="border rounded-md p-2 w-max">上传</button>
           </form>
           <ul class="flex flex-col gap-2 w-1/2">
             ${
-    objects.map(
-      (object) =>
-        html`
+    objects.map((object) => {
+      const objectUrl = buildUrl(`/objects/${object.id}`);
+      return html`
                   <li class="flex items-center justify-between py-4 px-5 border rounded-md">
                     <div class="flex flex-col gap-1">
                       <p>ID: ${object.id}</p>
                       <p>Key: ${object.key}</p>
                     </div>
                     <div class="flex gap-2 ml-auto">
-                      <form action="${exampleBaseUrlWithObject}/${object.id}" method="get">
+                      <form action="${objectUrl}" method="get">
                         <button type="submit" class="cursor-pointer">show</button>
                       </form>
-                      <form action="${exampleBaseUrlWithObject}/${object.id}" method="post">
+                      <form action="${objectUrl}" method="post">
                         <input type="text" name="_method" value="DELETE" class="hidden" />
                         <button type="submit" class="cursor-pointer">delete</button>
                       </form>
                     </div>
                   </li>
-                `,
-    )
+                `;
+    }).join("")
   }
           </ul>
         </div>
@@ -71,7 +73,7 @@ app.get("/", async (ctx) => {
 app.post("/objects", async (ctx) => {
   const formData = await ctx.req.formData();
   const file = formData.get("file") as File;
-  // 创建存储空间
+
   const createBaseRes = await fetch(storagePluginApi, {
     method: "POST",
     headers: {
@@ -86,47 +88,48 @@ app.post("/objects", async (ctx) => {
       post_expires_in_seconds: 3600,
     }),
   });
-  if (createBaseRes.ok) {
-    const createBaseData: {
-      object_id: string;
-      storagePluginApi: string;
-      fields: object;
-    } = await createBaseRes.json();
-    const uploadFileForm = new FormData();
-    Object.entries(createBaseData.fields).forEach(([key, value]) => {
-      uploadFileForm.append(key, value);
-    });
-    uploadFileForm.set("file", file);
-    const uploadRes = await fetch(createBaseData.storagePluginApi, {
-      method: "post",
-      body: uploadFileForm,
-    });
-    if (uploadRes.ok) {
-      return ctx.redirect(exampleBaseUrl);
-    }
-    return ctx.text(await uploadRes.text());
+
+  if (!createBaseRes.ok) {
+    console.error("Error:", createBaseRes);
+    return ctx.json(await createBaseRes.json());
   }
-  return ctx.json(await createBaseRes.json());
+
+  const createBaseData = await createBaseRes.json();
+  const uploadFileForm = new FormData();
+  Object.entries(createBaseData.fields).forEach(([key, value]) => {
+    uploadFileForm.append(key, value);
+  });
+  uploadFileForm.set("file", file);
+
+  const uploadRes = await fetch(createBaseData.storagePluginApi, {
+    method: "POST",
+    body: uploadFileForm,
+  });
+
+  if (uploadRes.ok) {
+    return ctx.redirect(exampleBaseUrl);
+  }
+  console.error("Error:", uploadRes);
+  return ctx.text(await uploadRes.text());
 });
 
 app.get("/objects/:id", async (ctx) => {
   const id = ctx.req.param("id");
-  const res = await fetch(`${storagePluginApi}/${id}`, {
-    method: "get",
-  });
+  const res = await fetch(buildUrl(`/objects/${id}`), { method: "GET" });
+
   if (res.ok) {
     const result = await res.json();
     return ctx.redirect(result.download_url);
   } else {
+    console.error("Error:", res);
     return ctx.text(await res.text());
   }
 });
 
 app.delete("/objects/:id", async (ctx) => {
   const id = ctx.req.param("id");
-  const res = await fetch(`${storagePluginApi}/${id}`, {
-    method: "DELETE",
-  });
+  const res = await fetch(buildUrl(`/objects/${id}`), { method: "DELETE" });
+
   if (res.ok) {
     return ctx.redirect(exampleBaseUrl);
   } else {
