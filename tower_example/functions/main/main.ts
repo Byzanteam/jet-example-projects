@@ -1,11 +1,15 @@
 import { JetTower } from "https://cdn.jsdelivr.net/gh/Byzanteam/jet-tower-plugin-js@v0.1.0/mod.ts";
 import { Hono } from "https://deno.land/x/hono@v4.0.10/mod.ts";
-import { joinPath } from "https://cdn.jsdelivr.net/gh/Byzanteam/breeze-js@v0.2.2/lib/url.ts";
+import {
+  buildUrl,
+  joinPath,
+} from "https://cdn.jsdelivr.net/gh/Byzanteam/breeze-js@v0.2.2/lib/url.ts";
 import {
   AuthorizationCodeAccessTokenRequestContext,
   AuthorizationCodeAuthorizationURL,
   sendTokenRequest,
 } from "https://esm.sh/@oslojs/oauth2@0.1.2";
+import { wrapTransaction } from "./db.ts";
 
 const tower = new JetTower({ instanceName: "tower" });
 
@@ -31,7 +35,7 @@ app.get("/login", (ctx) => {
     clientId,
   );
   url.setRedirectURI(
-    "https://nightly.jet.apps.jet.work/breeze/tower_example_v2/development/main/oauth2/callback",
+    buildUrl("/oauth2/callback"),
   );
 
   console.log(`Redirecting to: ${url.toString()}`);
@@ -53,7 +57,7 @@ app.get("/oauth2/callback", async (ctx) => {
 
   const context = new AuthorizationCodeAccessTokenRequestContext(code!);
   context.setRedirectURI(
-    "https://nightly.jet.apps.jet.work/breeze/tower_example_v2/development/main/oauth2/callback",
+    buildUrl("/oauth2/callback"),
   );
   context.authenticateWithHTTPBasicAuth(clientId, clientSecret);
 
@@ -77,6 +81,54 @@ app.get("/oauth2/callback", async (ctx) => {
   updated at: ${u.toLocaleString()}
   extra: ${JSON.stringify(extraInfo)}
   `);
+});
+
+app.get("/users", async (ctx) => {
+  const users = await wrapTransaction(async (trx) => {
+    return await trx
+      .withSchema("tower_example")
+      .selectFrom("universal_directory_users")
+      .selectAll()
+      .execute();
+  });
+
+  return ctx.json(users);
+});
+
+app.get("/groups", async (ctx) => {
+  const groups = await wrapTransaction(async (trx) => {
+    return await trx
+      .withSchema("tower_example")
+      .selectFrom("universal_directory_groups")
+      .selectAll()
+      .execute();
+  });
+
+  return ctx.json(groups);
+});
+
+app.get("/users_groups", async (ctx) => {
+  const usersGroups = await wrapTransaction(async (trx) => {
+    return await trx
+      .withSchema("tower_example")
+      .selectFrom("universal_directory_users_groups")
+      .selectAll()
+      .execute();
+  });
+
+  return ctx.json(usersGroups);
+});
+
+app.get("/users_im_users", async (ctx) => {
+  const usersImUsers = await wrapTransaction(async (trx) => {
+    return await trx
+      .withSchema("tower_example")
+      .selectFrom("universal_directory_users_im_users")
+      .selectAll()
+      .execute();
+  });
+
+  return ctx.json(usersImUsers);
 });
 
 BreezeRuntime.serveHttp(app.fetch);
