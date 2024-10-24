@@ -13,13 +13,9 @@ import postgres from "postgresjs/mod.js";
 export interface UserTable {
   name: string;
 }
-export interface LogTable {
-  id: string;
-  phone_number: string;
-}
+
 export interface Database {
   users: UserTable;
-  logs: LogTable;
 }
 
 setup(() => {
