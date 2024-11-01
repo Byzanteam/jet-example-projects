@@ -12,8 +12,7 @@
 1. `jcli plugins install tower` 安装 tower 插件实例
 1. `jcli function deploy` 部署函数
 1. 访问 `$BASE_URL/login` （如
-   `http://localhost:2137/tower_example/development/main/login`），并完成登录流程之后，得到的
-   user info（数据结构如下）
+   `http://localhost:2137/tower_example/development/main/login`），并完成登录流程之后，页面会显示当前登录用户信息（数据结构如下）
 
 ```
 ID: e395ae74-da56-4e53-bc57-c9bbb6564c28
