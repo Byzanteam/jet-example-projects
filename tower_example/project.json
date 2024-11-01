@@ -19,7 +19,7 @@
         "tower_example"
       ],
       "config": {
-        "pluginKey": "7b3b709f-0da9-44d3-ba63-ba2511d98e96"
+        "pluginKey": "{{ TOWER_PLUGIN_KEY }}"
       }
     }
   ],
