@@ -1,0 +1,43 @@
+{
+  "$schema": "https://cdn.jsdelivr.net/gh/Byzanteam/jcli/schemas/project-file.v1.json",
+  "name": "storage_plugin",
+  "title": "storage_plugin",
+  "capabilities": [
+    {
+      "name": "storage_plugin_db",
+      "payload": {
+        "__type__": "database",
+        "schema": "storage_plugin_schema"
+      }
+    }
+  ],
+  "instances": [
+    {
+      "capabilityNames": [
+        "storage_plugin_db"
+      ],
+      "config": {
+        "buckets": [
+          {
+            "accessKey": "{{ ACCESS_KEY }}",
+            "endpoint": "https://nightly.minio-api.apps.jet.work",
+            "name": "jet-storage-plugin-example",
+            "secretKey": "{{ SECRET_KEY }}"
+          }
+        ]
+      },
+      "name": "storage",
+      "pluginName": "storage"
+    }
+  ],
+  "imports": {
+    "hono": "jsr:@hono/hono@4.6.3",
+    "kysely-deno-postgres-dialect": "jsr:@byzanteam/kysely-deno-postgres-dialect@0.27.7",
+    "npm:postgres@3.4.4": "https://deno.land/x/postgresjs@v3.4.4/mod.js",
+    "npm:kysely@0.27.3": "https://esm.sh/kysely@0.27.3",
+    "postgresjs": "https://deno.land/x/postgresjs@v3.4.4/mod.js",
+    "kysely": "https://esm.sh/kysely@0.27.3",
+    "breeze-js/url": "https://cdn.jsdelivr.net/gh/Byzanteam/breeze-js@latest/lib/url.ts",
+    "breeze-js/runtime": "https://cdn.jsdelivr.net/gh/byzanteam/breeze-js@v0.2.1/lib/runtime.ts"
+  }
+}
