@@ -1,7 +1,9 @@
-import { Hono } from "https://deno.land/x/hono@v4.3.3/mod.ts";
+import { Hono } from "@hono/hono";
 import { wrapTransaction } from "./db.ts";
+import { serve } from "@byzanteam/breeze-js";
+import { getBaseUrl } from "@byzanteam/breeze-js/url";
 
-const app = new Hono();
+const app = new Hono().basePath(new URL(getBaseUrl()).pathname);
 
 app.get("/", (ctx) => {
   return ctx.text("Hello World!");
@@ -47,12 +49,9 @@ const variables = {
   ],
 };
 
-const pluginInstance: BreezeRuntime.Plugin = BreezeRuntime.plugins["sms"];
-const url = await pluginInstance.getEndpoint("/api/graphql");
-
 const sendSms = async () => {
   try {
-    const response = await fetch(url, {
+    const response = await BreezeRuntime.pluginFetch("sms", "/api/graphql", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -78,4 +77,4 @@ const sendSms = async () => {
   }
 };
 
-BreezeRuntime.serveHttp(app.fetch);
+serve(app.fetch);
