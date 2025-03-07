@@ -1,11 +1,21 @@
 {
   "$schema": "https://deno.land/x/deno/cli/schemas/config-file.v1.json",
+  "tasks": {
+    "build": "deno run -A scripts/build.ts"
+  },
   "compilerOptions": {
     "strict": true,
     "useUnknownInCatchVariables": true,
     "noImplicitOverride": true,
-    "types": [
-      "https://cdn.jsdelivr.net/gh/Byzanteam/breeze-js@v0.1.1/mod.d.ts"
-    ]
+    "types": ["https://cdn.jsdelivr.net/gh/Byzanteam/breeze-js@latest/mod.d.ts"]
+  },
+  "imports": {
+    "hono": "jsr:@hono/hono@4.6.3",
+    "kysely-deno-postgres-dialect/": "https://deno.land/x/kysely_postgrs_js_dialect@v0.27.5/",
+    "postgresjs/": "https://deno.land/x/postgresjs@v3.4.4/",
+    "kysely/": "https://cdn.jsdelivr.net/npm/kysely@0.27.3/dist/esm/",
+    "@byzanteam/breeze-js": "jsr:@byzanteam/breeze-js@^0.4.0",
+    "jet-tower-plugin-js": "https://cdn.jsdelivr.net/gh/Byzanteam/jet-tower-plugin-js@v0.2.0/mod.ts",
+    "@oslojs/oauth2": "https://esm.sh/@oslojs/oauth2@0.1.2"
   }
 }
