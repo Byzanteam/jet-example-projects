@@ -1,11 +1,9 @@
-import { Hono } from "https://deno.land/x/hono@v4.3.3/mod.ts";
+import { Hono } from "@hono/hono";
+import { serve, getEnvOrThrow } from "@byzanteam/breeze-js";
 
-const app = new Hono();
-
-const pluginInstance: BreezeRuntime.Plugin = BreezeRuntime.plugins["importer"];
+const app = new Hono().basePath(getEnvOrThrow("JET_BREEZE_PATH_PREFIX"));
 
 const sendRequest = async (method: string, url: string, body?: unknown) => {
-  const resquestUrl = await pluginInstance.getEndpoint(url);
   const options = {
     method,
     headers: {
@@ -13,7 +11,7 @@ const sendRequest = async (method: string, url: string, body?: unknown) => {
     },
     body: body ? JSON.stringify(body) : undefined,
   };
-  return await fetch(resquestUrl, options);
+  return await BreezeRuntime.pluginFetch("importer", url, options);
 };
 
 app.get("/", (ctx) => {
@@ -54,10 +52,9 @@ app.get(
     const importer_id = ctx.req.param("importer_id");
     const importation_id = ctx.req.param("importation_id");
     const filename = ctx.req.query("filename");
-    const url =
-      `/importers/${importer_id}/importations/${importation_id}/failed_file?filename=${filename}`;
+    const url = `/importers/${importer_id}/importations/${importation_id}/failed_file?filename=${filename}`;
     return await sendRequest("GET", url);
-  },
+  }
 );
 
-BreezeRuntime.serveHttp(app.fetch);
+serve(app.fetch);

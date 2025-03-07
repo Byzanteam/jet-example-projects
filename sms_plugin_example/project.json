@@ -2,6 +2,7 @@
   "$schema": "https://cdn.jsdelivr.net/gh/Byzanteam/jcli/schemas/project-file.v1.json",
   "name": "sms_plugin_example",
   "title": "sms_plugin_example",
+  "entryFile": "main.js",
   "capabilities": [
     {
       "name": "sms_database",
@@ -13,9 +14,7 @@
   ],
   "instances": [
     {
-      "capabilityNames": [
-        "sms_database"
-      ],
+      "capabilityNames": ["sms_database"],
       "config": {
         "accessKeyId": "{{ ACCESS_KEY_ID }}",
         "accessSecret": "{{ ACCESS_SECRET }}",
@@ -26,9 +25,5 @@
       "pluginName": "sms"
     }
   ],
-  "imports": {
-    "kysely-deno-postgres-dialect/": "https://deno.land/x/kysely_postgrs_js_dialect@v0.27.5/",
-    "postgresjs/": "https://deno.land/x/postgresjs@v3.4.4/",
-    "kysely/": "https://cdn.jsdelivr.net/npm/kysely@0.27.3/dist/esm/"
-  }
+  "runningWorkflows": {}
 }

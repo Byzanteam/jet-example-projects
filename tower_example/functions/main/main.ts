@@ -1,14 +1,12 @@
-import { JetTower } from "https://cdn.jsdelivr.net/gh/Byzanteam/jet-tower-plugin-js@v0.1.0/mod.ts";
-import { Hono } from "https://deno.land/x/hono@v4.0.10/mod.ts";
-import {
-  buildUrl,
-  joinPath,
-} from "https://cdn.jsdelivr.net/gh/Byzanteam/breeze-js@v0.2.2/lib/url.ts";
+import { JetTower } from "jet-tower-plugin-js";
+import { Hono } from "hono";
+import { buildUrl, joinPath } from "@byzanteam/breeze-js/url";
+import { serve, getEnvOrThrow } from "@byzanteam/breeze-js";
 import {
   AuthorizationCodeAccessTokenRequestContext,
   AuthorizationCodeAuthorizationURL,
   sendTokenRequest,
-} from "https://esm.sh/@oslojs/oauth2@0.1.2";
+} from "@oslojs/oauth2";
 import { wrapTransaction } from "./db.ts";
 
 const tower = new JetTower({ instanceName: "tower" });
@@ -22,7 +20,7 @@ console.log(`Token URL: ${tokenUrl.toString()}`);
 console.log(`Client ID: ${clientId}`);
 console.log(`Client Secret: ${clientSecret}`);
 
-const app = new Hono();
+const app = new Hono().basePath(getEnvOrThrow("JET_BREEZE_PATH_PREFIX"));
 
 app.get("/", (ctx) => {
   console.log(`Request reached.`);
@@ -32,11 +30,9 @@ app.get("/", (ctx) => {
 app.get("/login", (ctx) => {
   const url = new AuthorizationCodeAuthorizationURL(
     authorizeUrl.toString(),
-    clientId,
+    clientId
   );
-  url.setRedirectURI(
-    buildUrl("/oauth2/callback"),
-  );
+  url.setRedirectURI(buildUrl("/oauth2/callback"));
 
   console.log(`Redirecting to: ${url.toString()}`);
 
@@ -48,7 +44,7 @@ app.get("/oauth2/callback", async (ctx) => {
   url.pathname = joinPath(
     "breeze",
     BreezeRuntime.env.get("JET_BREEZE_PATH_PREFIX")!,
-    "/oauth2/callback",
+    "/oauth2/callback"
   );
 
   console.log(`Getting token...`);
@@ -56,9 +52,7 @@ app.get("/oauth2/callback", async (ctx) => {
   const code = url.searchParams.get("code");
 
   const context = new AuthorizationCodeAccessTokenRequestContext(code!);
-  context.setRedirectURI(
-    buildUrl("/oauth2/callback"),
-  );
+  context.setRedirectURI(buildUrl("/oauth2/callback"));
   context.authenticateWithHTTPBasicAuth(clientId, clientSecret);
 
   const tokens = await sendTokenRequest(tokenUrl.toString(), context);
@@ -67,10 +61,8 @@ app.get("/oauth2/callback", async (ctx) => {
 
   console.log(`Getting user info...`);
 
-  const { sub, name, phoneNumber, updatedAt, ...extraInfo } = await tower
-    .getUserInfo(
-      tokens.access_token,
-    );
+  const { sub, name, phoneNumber, updatedAt, ...extraInfo } =
+    await tower.getUserInfo(tokens.access_token);
 
   const u = new Date(updatedAt * 1000);
 
@@ -131,4 +123,4 @@ app.get("/users_im_users", async (ctx) => {
   return ctx.json(usersImUsers);
 });
 
-BreezeRuntime.serveHttp(app.fetch);
+serve(app.fetch);
