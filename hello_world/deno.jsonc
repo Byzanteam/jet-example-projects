@@ -1,11 +1,16 @@
 {
   "$schema": "https://deno.land/x/deno/cli/schemas/config-file.v1.json",
+  "tasks": {
+    "build": "deno run -A scripts/build.ts"
+  },
   "compilerOptions": {
     "strict": true,
     "useUnknownInCatchVariables": true,
     "noImplicitOverride": true,
-    "types": [
-      "https://cdn.jsdelivr.net/gh/Byzanteam/breeze-js@v0.1.1/mod.d.ts"
-    ]
+    "types": ["https://cdn.jsdelivr.net/gh/Byzanteam/breeze-js@latest/mod.d.ts"]
+  },
+  "imports": {
+    "@hono/hono": "jsr:@hono/hono@4.6.3",
+    "@byzanteam/breeze-js": "jsr:@byzanteam/breeze-js@^0.4.0"
   }
 }

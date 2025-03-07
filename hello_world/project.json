@@ -2,6 +2,8 @@
   "$schema": "https://cdn.jsdelivr.net/gh/Byzanteam/jcli/schemas/project-file.v1.json",
   "name": "hello_world",
   "title": "hello_world",
+  "entryFile": "main.js",
   "capabilities": [],
-  "instances": []
+  "instances": [],
+  "runningWorkflows": {}
 }

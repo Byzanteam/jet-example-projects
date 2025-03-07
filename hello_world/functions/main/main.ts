@@ -1,7 +1,8 @@
-import { Hono } from "https://deno.land/x/hono@v3.4.1/mod.ts";
-import { serveHttp } from "https://cdn.jsdelivr.net/gh/Byzanteam/breeze-js@latest/lib/runtime.ts";
+import { Hono } from "@hono/hono";
+import { serve } from "@byzanteam/breeze-js";
+import { getBaseUrl } from "@byzanteam/breeze-js/url";
 
-const app = new Hono();
+const app = new Hono().basePath(new URL(getBaseUrl()).pathname);
 
 app.get("/", (c) => c.text("Hello world!"));
 app.get("/greet/:name", (c) => {
@@ -12,4 +13,4 @@ app.notFound((c) => {
   return c.text("Not found", 404);
 });
 
-serveHttp(app.fetch);
+serve(app.fetch);
