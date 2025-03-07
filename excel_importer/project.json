@@ -13,9 +13,7 @@
   ],
   "instances": [
     {
-      "capabilityNames": [
-        "excel_importer_database"
-      ],
+      "capabilityNames": ["excel_importer_database"],
       "config": {
         "placeholder": "foo"
       },
