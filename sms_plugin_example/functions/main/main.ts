@@ -1,9 +1,8 @@
 import { Hono } from "@hono/hono";
 import { wrapTransaction } from "./db.ts";
-import { serve } from "@byzanteam/breeze-js";
-import { getBaseUrl } from "@byzanteam/breeze-js/url";
+import { serve, getEnvOrThrow } from "@byzanteam/breeze-js";
 
-const app = new Hono().basePath(new URL(getBaseUrl()).pathname);
+const app = new Hono().basePath(getEnvOrThrow("JET_BREEZE_PATH_PREFIX"));
 
 app.get("/", (ctx) => {
   return ctx.text("Hello World!");

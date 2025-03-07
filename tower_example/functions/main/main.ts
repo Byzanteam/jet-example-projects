@@ -1,7 +1,7 @@
 import { JetTower } from "jet-tower-plugin-js";
 import { Hono } from "hono";
-import { buildUrl, joinPath, getBaseUrl } from "@byzanteam/breeze-js/url";
-import { serve } from "@byzanteam/breeze-js";
+import { buildUrl, joinPath } from "@byzanteam/breeze-js/url";
+import { serve, getEnvOrThrow } from "@byzanteam/breeze-js";
 import {
   AuthorizationCodeAccessTokenRequestContext,
   AuthorizationCodeAuthorizationURL,
@@ -20,7 +20,7 @@ console.log(`Token URL: ${tokenUrl.toString()}`);
 console.log(`Client ID: ${clientId}`);
 console.log(`Client Secret: ${clientSecret}`);
 
-const app = new Hono().basePath(new URL(getBaseUrl()).pathname);
+const app = new Hono().basePath(getEnvOrThrow("JET_BREEZE_PATH_PREFIX"));
 
 app.get("/", (ctx) => {
   console.log(`Request reached.`);

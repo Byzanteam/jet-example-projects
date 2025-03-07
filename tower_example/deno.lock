@@ -687,6 +687,7 @@
   },
   "workspace": {
     "dependencies": [
+      "jsr:@byzanteam/breeze-js@0.4",
       "jsr:@hono/hono@4.6.3"
     ]
   }

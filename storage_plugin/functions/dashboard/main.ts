@@ -2,8 +2,8 @@ import { Hono } from "hono";
 import { html } from "hono/html";
 import { wrapTransaction } from "./db.ts";
 import { methodOverride } from "hono/method-override";
-import { serve } from "@byzanteam/breeze-js";
-import { buildUrl, getBaseUrl } from "@byzanteam/breeze-js/url";
+import { getEnvOrThrow, serve } from "@byzanteam/breeze-js";
+import { buildUrl } from "@byzanteam/breeze-js/url";
 
 interface ObjectResponse {
   id: string;
@@ -25,7 +25,7 @@ interface PresignedPostDataResponse {
   object_id: string;
 }
 
-const basename = new URL(getBaseUrl()).pathname;
+const basename = getEnvOrThrow("JET_BREEZE_PATH_PREFIX");
 const app = new Hono().basePath(basename);
 const bucketName = "jet-storage-plugin-example";
 

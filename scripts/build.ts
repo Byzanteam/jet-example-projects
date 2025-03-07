@@ -1,6 +1,7 @@
-import { build, type Plugin, stop } from "npm:esbuild";
-import copy from "npm:esbuild-copy-files-plugin";
-import { denoPlugins } from "jsr:@luca/esbuild-deno-loader";
+import { build, type Plugin, stop } from "esbuild";
+import copy from "esbuild-copy-files-plugin";
+import { denoPlugins } from "@luca/esbuild-deno-loader";
+import { join } from "@std/path/join";
 
 const BUILTIN_NODE_MODULES = new Set([
   "assert",
@@ -76,29 +77,37 @@ const nodeModuleAliasPlugin: Plugin = {
 const nodePolyfillPlugin: Plugin = {
   name: "node-polyfill",
   setup(build) {
-    build.initialOptions.inject = ["./scripts/node-polyfill.js"];
+    build.initialOptions.inject = [
+      join(import.meta.dirname!, "./node-polyfill.js"),
+    ];
   },
 };
 
-await build({
-  entryPoints: ["functions/dashboard/main.ts"],
-  outdir: ".jcli/functions",
-  outbase: "functions",
-  plugins: [
-    copy({
-      source: ["migrations"],
-      target: ".jcli",
-      copyWithFolder: true,
-    }),
-    nodeModuleAliasPlugin,
-    nodePolyfillPlugin,
-    ...denoPlugins(),
-  ],
-  bundle: true,
-  format: "esm",
-  sourcemap: "external",
-  minify: true,
-  treeShaking: true,
-});
+export async function buildProject({
+  entryPoints,
+}: {
+  entryPoints: Array<string>;
+}) {
+  await build({
+    entryPoints,
+    outdir: ".jcli/functions",
+    outbase: "functions",
+    plugins: [
+      copy({
+        source: ["migrations"],
+        target: ".jcli",
+        copyWithFolder: true,
+      }),
+      nodeModuleAliasPlugin,
+      nodePolyfillPlugin,
+      ...denoPlugins(),
+    ],
+    bundle: true,
+    format: "esm",
+    sourcemap: "external",
+    minify: true,
+    treeShaking: true,
+  });
 
-stop();
+  stop();
+}

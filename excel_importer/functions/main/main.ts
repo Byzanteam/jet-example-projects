@@ -1,8 +1,7 @@
 import { Hono } from "@hono/hono";
-import { serve } from "@byzanteam/breeze-js";
-import { getBaseUrl } from "@byzanteam/breeze-js/url";
+import { serve, getEnvOrThrow } from "@byzanteam/breeze-js";
 
-const app = new Hono().basePath(new URL(getBaseUrl()).pathname);
+const app = new Hono().basePath(getEnvOrThrow("JET_BREEZE_PATH_PREFIX"));
 
 const sendRequest = async (method: string, url: string, body?: unknown) => {
   const options = {
