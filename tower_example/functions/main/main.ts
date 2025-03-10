@@ -43,7 +43,7 @@ app.get("/oauth2/callback", async (ctx) => {
   const url = new URL(ctx.req.url);
   url.pathname = joinPath(
     "breeze",
-    BreezeRuntime.env.get("JET_BREEZE_PATH_PREFIX")!,
+    getEnvOrThrow("JET_BREEZE_PATH_PREFIX")!,
     "/oauth2/callback"
   );
 
